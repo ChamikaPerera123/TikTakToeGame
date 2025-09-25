@@ -1,25 +1,11 @@
 #include<stdio.h>
-int main(){
-	int Login;
-	printf("Two Players-Enter 1");
-	scanf("%d",&Login);
-	printf("User Vs Computer-Enter 2");
-	scanf("%d",&Login);
-	printf("Multiple Players-Enter 3");
-	scanf("%d",&Login);
+#include<stdlib.h>
+#include<stdbool.h>
 
-	if(Login==1){
-		printf("HI");
-	}
-	else if(Login==2){
-		printf("Bye");
-	}
-	else if(Login==3){
-		printf("go");
-	}
-	else
-		printf("Invalid Index");
-	return 0;
-}
-	
-
+char** initializeBoard(int n);
+void displayBoard(char** board, int n);
+bool isValidMove(char** board, int n, int row, int col);
+void makeMove(char** board, int n, int row, int col, char player);
+bool checkWin(char** board,int n, char player);
+bool checkDraw(char** board,int n);
+void logBoard(FILE* logFile, char** board, int n);
