@@ -5,31 +5,40 @@
 char** initializeBoard(int n);
 void displayBoard(char** board, int n);
 bool isValidMove(char** board, int n, int row, int col);
-void makeMove(char** board, int n, int row, int col, char player);
+//void makeMove(char** board, int n, int row, int col, char player);
 bool checkWin(char** board,int n, char player);
 bool checkDraw(char** board,int n);
 void logBoard(FILE* logFile, char** board, int n);
+void freeBoard(char** board, int n);
 
 int main() {
-    int n, row, col;
-    char player = 'X';
-    FILE* logFile = fopen("tictactoe_log.txt", "w");
-
+    int n;
     printf("Enter board size (3-10): ");
     scanf("%d", &n);
 
     if (n < 3 || n > 10) {
-        printf("Invalid size. Exiting.\n");
+        printf("Invalid board size!\n");
         return 1;
     }
 
-    // Dynamic allocation of board
+    // Initialize board
     char** board = initializeBoard(n);
 
-    int moves = 0;
+    // Open log file
+    FILE* logFile = fopen("tictactoe_log.txt", "w");
+    if (!logFile) {
+        printf("Error opening log file!\n");
+        freeBoard(board, n);
+        return 1;
+    }
+
+    int moves = 0, maxMoves = n * n;
+    char currentPlayer = 'X';
+    int row, col;
+
     while (true) {
         displayBoard(board, n);
-        printf("Player %c, enter your move (row and column): ", player);
+        printf("Player %c, enter your move (row col): ", currentPlayer);
         scanf("%d %d", &row, &col);
 
         if (!isValidMove(board, n, row, col)) {
@@ -37,18 +46,17 @@ int main() {
             continue;
         }
 
-        makeMove(board, row, col, player);
+        board[row][col] = currentPlayer;
         moves++;
 
-        // Log current state
+        // Log board state
         logBoard(logFile, board, n);
 
-        if (checkWin(board, n, player)) {
+        if (checkWin(board, n, currentPlayer)) {
             displayBoard(board, n);
-            printf("Player %c wins!\n", player);
+            printf("Player %c wins!\n", currentPlayer);
             break;
         }
-
         if (checkDraw(board, n)) {
             displayBoard(board, n);
             printf("It's a draw!\n");
@@ -56,20 +64,15 @@ int main() {
         }
 
         // Switch player
-        player = (player == 'X') ? 'O' : 'X';
+        currentPlayer = (currentPlayer == 'X') ? 'O' : 'X';
     }
-
-    // Free memory
-    for (int i = 0; i < n; i++) {
-        free(board[i]);
-    }
-    free(board);
 
     fclose(logFile);
+    freeBoard(board, n);
     return 0;
 }
 
-// Initialize the game board
+// Initialize game board dynamically
 char** initializeBoard(int n) {
     char** board = (char**)malloc(n * sizeof(char*));
     for (int i = 0; i < n; i++) {
@@ -81,7 +84,7 @@ char** initializeBoard(int n) {
     return board;
 }
 
-// Display the game board
+// Display game board
 void displayBoard(char** board, int n) {
     printf("\n");
     for (int i = 0; i < n; i++) {
@@ -91,24 +94,18 @@ void displayBoard(char** board, int n) {
         }
         printf("\n");
         if (i < n - 1) {
-            for (int j = 0; j < n; j++) {
-                printf("---");
-                if (j < n - 1) printf("+");
-            }
+            for (int k = 0; k < n; k++) printf("--- ");
             printf("\n");
         }
     }
     printf("\n");
 }
 
-// Check if move is valid
+// Validate move
 bool isValidMove(char** board, int n, int row, int col) {
-    return (row >= 0 && row < n && col >= 0 && col < n && board[row][col] == ' ');
-}
-
-// Place the move
-void makeMove(char** board, int row, int col, char player) {
-    board[row][col] = player;
+    if (row < 0 || row >= n || col < 0 || col >= n) return false;
+    if (board[row][col] != ' ') return false;
+    return true;
 }
 
 // Check win condition
@@ -117,10 +114,7 @@ bool checkWin(char** board, int n, char player) {
     for (int i = 0; i < n; i++) {
         bool win = true;
         for (int j = 0; j < n; j++) {
-            if (board[i][j] != player) {
-                win = false;
-                break;
-            }
+            if (board[i][j] != player) { win = false; break; }
         }
         if (win) return true;
     }
@@ -129,10 +123,7 @@ bool checkWin(char** board, int n, char player) {
     for (int j = 0; j < n; j++) {
         bool win = true;
         for (int i = 0; i < n; i++) {
-            if (board[i][j] != player) {
-                win = false;
-                break;
-            }
+            if (board[i][j] != player) { win = false; break; }
         }
         if (win) return true;
     }
@@ -140,27 +131,21 @@ bool checkWin(char** board, int n, char player) {
     // Check main diagonal
     bool win = true;
     for (int i = 0; i < n; i++) {
-        if (board[i][i] != player) {
-            win = false;
-            break;
-        }
+        if (board[i][i] != player) { win = false; break; }
     }
     if (win) return true;
 
     // Check anti-diagonal
     win = true;
     for (int i = 0; i < n; i++) {
-        if (board[i][n - 1 - i] != player) {
-            win = false;
-            break;
-        }
+        if (board[i][n - i - 1] != player) { win = false; break; }
     }
     if (win) return true;
 
     return false;
 }
 
-// Check draw
+// Check draw condition
 bool checkDraw(char** board, int n) {
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
@@ -170,9 +155,9 @@ bool checkDraw(char** board, int n) {
     return true;
 }
 
-// Log the current board to file
+// Log board state to file
 void logBoard(FILE* logFile, char** board, int n) {
-    fprintf(logFile, "\n");
+    fprintf(logFile, "\nBoard State:\n");
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
             fprintf(logFile, " %c ", board[i][j]);
@@ -180,13 +165,17 @@ void logBoard(FILE* logFile, char** board, int n) {
         }
         fprintf(logFile, "\n");
         if (i < n - 1) {
-            for (int j = 0; j < n; j++) {
-                fprintf(logFile, "---");
-                if (j < n - 1) fprintf(logFile, "+");
-            }
+            for (int k = 0; k < n; k++) fprintf(logFile, "--- ");
             fprintf(logFile, "\n");
         }
     }
     fprintf(logFile, "\n");
 }
 
+// Free dynamically allocated memory
+void freeBoard(char** board, int n) {
+    for (int i = 0; i < n; i++) {
+        free(board[i]);
+    }
+    free(board);
+}
