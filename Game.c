@@ -1,6 +1,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<stdbool.h>
+#include<time.h>
 
 char** initializeBoard(int n);
 void displayBoard(char** board, int n);
@@ -10,9 +11,10 @@ bool checkWin(char** board,int n, char player);
 bool checkDraw(char** board,int n);
 void logBoard(FILE* logFile, char** board, int n);
 void freeBoard(char** board, int n);
+void computerMove(char** board, int n, int* row, int* col);
 
 int main() {
-    int n;
+    int n, mode;
     printf("Enter board size (3-10): ");
     scanf("%d", &n);
 
@@ -20,6 +22,11 @@ int main() {
         printf("Invalid board size!\n");
         return 1;
     }
+    printf("Choose game mode:\n");
+    printf("1. User vs User\n");
+    printf("2. User vs Computer\n");
+    printf("Enter choice: ");
+    scanf("%d", &mode);
 
     // Initialize board
     char** board = initializeBoard(n);
@@ -32,18 +39,28 @@ int main() {
         return 1;
     }
 
-    int moves = 0, maxMoves = n * n;
+    srand(time(NULL));
+
+    int moves = 0; //maxMoves = n * n;
     char currentPlayer = 'X';
     int row, col;
 
     while (true) {
         displayBoard(board, n);
-        printf("Player %c, enter your move (row col): ", currentPlayer);
-        scanf("%d %d", &row, &col);
+        
+        if (mode == 1 || currentPlayer == 'X') {
+            // User input
+            printf("Player %c, enter your move (row col): ", currentPlayer);
+            scanf("%d %d", &row, &col);
 
-        if (!isValidMove(board, n, row, col)) {
-            printf("Invalid move! Try again.\n");
-            continue;
+            if (!isValidMove(board, n, row, col)) {
+                printf("Invalid move! Try again.\n");
+                continue;
+            }
+        } else {
+            // Computer move
+            computerMove(board, n, &row, &col);
+            printf("Computer chooses: %d %d\n", row, col);
         }
 
         board[row][col] = currentPlayer;
@@ -54,7 +71,10 @@ int main() {
 
         if (checkWin(board, n, currentPlayer)) {
             displayBoard(board, n);
-            printf("Player %c wins!\n", currentPlayer);
+            if (mode == 2 && currentPlayer == 'O')
+                printf("Computer wins!\n");
+            else
+                printf("Player %c wins!\n", currentPlayer);
             break;
         }
         if (checkDraw(board, n)) {
@@ -179,3 +199,13 @@ void freeBoard(char** board, int n) {
     }
     free(board);
 }
+
+// Generate random computer move
+void computerMove(char** board, int n, int* row, int* col) {
+    do {
+        *row = rand() % n;
+        *col = rand() % n;
+    } while (!isValidMove(board, n, *row, *col));
+} 
+
+       
