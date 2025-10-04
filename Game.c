@@ -8,7 +8,6 @@ char **board;
 int N;
 FILE *logFile;
 
-// Initialize the board
 void initBoard() {
     board = (char **)malloc(N * sizeof(char *));
     for(int i = 0; i < N; i++) {
@@ -18,7 +17,7 @@ void initBoard() {
     }
 }
 
-// Display the board
+
 void displayBoard() {
     printf("\n");
     for(int i = 0; i < N; i++) {
@@ -38,9 +37,9 @@ void displayBoard() {
     printf("\n");
 }
 
-// Check for win condition
+
 int checkWin(char symbol) {
-    // rows and columns
+    
     for(int i = 0; i < N; i++) {
         int row = 1, col = 1;
         for(int j = 0; j < N; j++) {
@@ -49,7 +48,7 @@ int checkWin(char symbol) {
         }
         if(row || col) return 1;
     }
-    // diagonals
+    
     int diag1 = 1, diag2 = 1;
     for(int i = 0; i < N; i++) {
         if(board[i][i] != symbol) diag1 = 0;
@@ -58,7 +57,7 @@ int checkWin(char symbol) {
     return (diag1 || diag2);
 }
 
-// Check for draw
+
 int checkDraw() {
     for(int i = 0; i < N; i++)
         for(int j = 0; j < N; j++)
@@ -66,7 +65,7 @@ int checkDraw() {
     return 1;
 }
 
-// Human player move
+
 void playerMove(char symbol) {
     int row, col;
     do {
@@ -77,7 +76,7 @@ void playerMove(char symbol) {
     fprintf(logFile, "Player (%c) played at %d,%d\n", symbol, row, col);
 }
 
-// Computer random move
+
 void computerMove(char symbol) {
     int row, col;
     do {
@@ -89,7 +88,6 @@ void computerMove(char symbol) {
     fprintf(logFile, "Computer (%c) played at %d,%d\n", symbol, row, col);
 }
 
-// Free allocated memory
 void freeBoard() {
     for(int i = 0; i < N; i++)
         free(board[i]);
@@ -118,7 +116,7 @@ int main() {
     scanf("%d", &mode);
 
     char players[3] = {'X','O','Z'};
-    int isComputer[3] = {0,0,0}; // all human by default
+    int isComputer[3] = {0,0,0}; 
     int totalPlayers = (mode == 3 ? 3 : 2);
 
     if(mode == 1) {
@@ -126,7 +124,7 @@ int main() {
     }
     else if(mode == 2) {
         printf("Mode: User vs Computer.\n");
-        isComputer[1] = 1; // Player O is computer
+        isComputer[1] = 1; 
     }
     else if(mode == 3) {
         printf("Mode: Multi-Player (3 players).\n");
